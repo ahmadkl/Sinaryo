@@ -42,11 +42,11 @@ jobs:
           set -o pipefail
           ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee ../gradle.log
 
-      - name: Show Gradle error summary
+      - name: Show build error summary
         if: failure()
         run: |
-          msg=$(grep -E -A12 "What went wrong|FAILURE: Build failed|error:" gradle.log | head -40 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
-          echo "::error title=Gradle failure::${msg}"
+          msg=$(grep -E -B3 -A12 "Unable to resolve|SyntaxError|Error:|Bundling failed|Metro error|ERROR " gradle.log | grep -v "^\s*at org.gradle" | head -60 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Build failure::${msg}"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
